@@ -86,6 +86,17 @@ src/main/resources/
 └── static/index.html              # web UI — vanilla HTML/CSS/JS, no build step
 ```
 
+## Deploying (Docker)
+
+The repo ships a multi-stage `Dockerfile` (Maven build → slim JRE runtime, runs as non-root), so it deploys to any container host. The app reads the port from `$PORT` (falls back to `8080`), which is what hosts like Render pass in.
+
+```bash
+docker build -t url-shortener .
+docker run -p 8080:8080 url-shortener
+```
+
+To deploy on [Render](https://render.com): **New → Web Service →** connect this repo → it detects the Dockerfile and builds it. No start command needed (the Dockerfile's ENTRYPOINT handles it). Free-tier instances sleep when idle — the first request after a pause may take ~1 min while the JVM boots.
+
 ## Notes
 
 - The H2 database is in-memory, so data resets on restart. To use a real database, swap the datasource in `src/main/resources/application.properties` for MySQL/Postgres and add the appropriate driver dependency.
