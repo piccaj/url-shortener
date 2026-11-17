@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/piccaj/url-shortener/actions/workflows/ci.yml/badge.svg)](https://github.com/piccaj/url-shortener/actions/workflows/ci.yml)
 
+**Live demo:** https://url-shortener-jntt.onrender.com — free tier, so the first request may take ~1 min while it wakes up.
+
 A URL shortener web app built with Spring Boot, JPA, and an in-memory H2 database — REST API **and** a bundled web UI.
 
 ## Features
