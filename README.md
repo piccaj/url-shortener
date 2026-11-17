@@ -1,5 +1,7 @@
 # URL Shortener
 
+[![CI](https://github.com/piccaj/url-shortener/actions/workflows/ci.yml/badge.svg)](https://github.com/piccaj/url-shortener/actions/workflows/ci.yml)
+
 A minimal URL shortener REST API built with Spring Boot, JPA, and an in-memory H2 database.
 
 ## Features
