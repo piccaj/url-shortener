@@ -2,15 +2,17 @@
 
 [![CI](https://github.com/piccaj/url-shortener/actions/workflows/ci.yml/badge.svg)](https://github.com/piccaj/url-shortener/actions/workflows/ci.yml)
 
-A minimal URL shortener REST API built with Spring Boot, JPA, and an in-memory H2 database.
+A URL shortener web app built with Spring Boot, JPA, and an in-memory H2 database — REST API **and** a bundled web UI.
 
 ## Features
 
+- **Web UI** at `/` — paste a URL, get a short link with copy/open buttons, plus a live table of recent links and click counts
 - `POST /api/shorten` — create a short URL from any `http`/`https` URL
 - `GET /{slug}` — 302 redirect to the original URL
 - `GET /api/urls/{slug}` — view stats (original URL, visit count)
+- `GET /api/urls/recent?limit=N` — recently created links
 - `GET /api/urls/top` — the most-visited short URL
-- Input validation on the `url` field (blank / non-http values rejected with 400)
+- Input validation on the `url` field (blank / non-http values rejected with 400 + readable error)
 
 ## Quick start
 
@@ -20,7 +22,7 @@ Requires Java 21 and Maven.
 mvn spring-boot:run
 ```
 
-The app starts on `http://localhost:8080`.
+Then open **http://localhost:8080** — the web UI is served by the same Spring Boot app, no separate frontend build required.
 
 ## Usage
 
@@ -75,9 +77,13 @@ Runs the unit tests plus a full-stack API integration test suite (service tests,
 src/main/java/com/example/shortener/
 ├── UrlShortenerApplication.java   # entry point
 ├── controller/                    # REST endpoints + DTOs
+├── exception/                     # validation error → readable JSON
 ├── model/                         # JPA entity
 ├── repository/                    # Spring Data JPA repository
 └── service/                       # slug generation + business logic
+src/main/resources/
+├── application.properties         # config (H2 datasource, port)
+└── static/index.html              # web UI — vanilla HTML/CSS/JS, no build step
 ```
 
 ## Notes

@@ -17,7 +17,10 @@ public class RedirectController {
         this.service = service;
     }
 
-    @GetMapping("/{slug}")
+    // Constrained to the exact slug format so this catch-all doesn't shadow
+    // static resources (e.g. /index.html, /favicon.ico), which would otherwise
+    // be routed here and 404 as unknown slugs.
+    @GetMapping("/{slug:[0-9a-zA-Z]{7}}")
     public ResponseEntity<?> redirect(@PathVariable("slug") String slug) {
         return service.resolve(slug)
                 .<ResponseEntity<?>>map(url -> ResponseEntity.status(HttpStatus.FOUND)

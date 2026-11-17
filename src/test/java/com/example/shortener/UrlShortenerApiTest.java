@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,39 @@ class UrlShortenerApiTest {
 
         assertThat(redirect.statusCode()).isEqualTo(302);
         assertThat(redirect.headers().firstValue("Location").orElseThrow()).isEqualTo("https://example.com/redirect");
+    }
+
+    @Test
+    void recentReturnsNewestFirstAndRespectsLimit() {
+        // The Spring context is shared across tests, so other URLs may exist —
+        // assert relative ordering of the three we create here, not absolute size.
+        restTemplate.postForEntity("/api/shorten", body("https://example.com/first"), Map.class);
+        restTemplate.postForEntity("/api/shorten", body("https://example.com/second"), Map.class);
+        restTemplate.postForEntity("/api/shorten", body("https://example.com/third"), Map.class);
+
+        ResponseEntity<List> all = restTemplate.getForEntity("/api/urls/recent?limit=50", List.class);
+        assertThat(all.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        List<String> urls = ((List<?>) all.getBody()).stream()
+                .map(row -> (String) ((Map<?, ?>) row).get("originalUrl"))
+                .toList();
+        int third = urls.indexOf("https://example.com/third");
+        int second = urls.indexOf("https://example.com/second");
+        int first = urls.indexOf("https://example.com/first");
+        assertThat(third).isGreaterThanOrEqualTo(0);
+        assertThat(second).isGreaterThan(third);
+        assertThat(first).isGreaterThan(second);
+
+        ResponseEntity<List> limited = restTemplate.getForEntity("/api/urls/recent?limit=1", List.class);
+        assertThat(limited.getBody()).hasSize(1);
+    }
+
+    @Test
+    void validationErrorsReturnReadableMessage() {
+        ResponseEntity<Map> response = restTemplate.postForEntity("/api/shorten", body("not-a-url"), Map.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat((String) response.getBody().get("error")).containsIgnoringCase("http");
     }
 
     private record Body(String url) {

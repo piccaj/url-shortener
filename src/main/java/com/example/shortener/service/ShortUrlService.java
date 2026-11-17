@@ -4,6 +4,7 @@ import com.example.shortener.model.ShortUrl;
 import com.example.shortener.repository.ShortUrlRepository;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,12 @@ public class ShortUrlService {
 
     public Optional<ShortUrl> findMostVisited() {
         return repository.findTopBySlugNotNullOrderByVisitCountDesc();
+    }
+
+    public List<ShortUrl> findRecent(int limit) {
+        return repository.findTop50ByOrderByCreatedAtDesc().stream()
+                .limit(Math.max(1, limit))
+                .toList();
     }
 
     private String generateUniqueSlug() {

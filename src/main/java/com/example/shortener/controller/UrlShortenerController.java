@@ -3,6 +3,7 @@ package com.example.shortener.controller;
 import com.example.shortener.model.ShortUrl;
 import com.example.shortener.service.ShortUrlService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -41,6 +43,14 @@ public class UrlShortenerController {
         return service.findMostVisited()
                 .<ResponseEntity<?>>map(url -> ResponseEntity.ok(ShortenResponse.of(url, currentBaseUrl())))
                 .orElseGet(() -> ResponseEntity.status(404).body(Map.of("error", "no urls shortened yet")));
+    }
+
+    @GetMapping("/urls/recent")
+    public ResponseEntity<?> recent(@RequestParam(name = "limit", defaultValue = "10") int limit) {
+        List<ShortenResponse> recent = service.findRecent(limit).stream()
+                .map(url -> ShortenResponse.of(url, currentBaseUrl()))
+                .toList();
+        return ResponseEntity.ok(recent);
     }
 
     private String currentBaseUrl() {
